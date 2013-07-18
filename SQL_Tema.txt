@@ -103,3 +103,5 @@ update salariat
 set salariu=salariu+0.1*salariu
 where id_departament in (select A.id_departament from departament A, salariat B
 where A.id_departament = B.id_departament group by A.id_departament having count(B.salariu)=1)
+
+new line
