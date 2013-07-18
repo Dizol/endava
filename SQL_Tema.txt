@@ -1,0 +1,105 @@
+/**
+** Tabel departament 
+**/		
+Table
+Data
+Indexes
+Model
+Constraints
+Grants
+Statistics
+UI Defaults
+Triggers
+Dependencies
+SQL
+
+CREATE TABLE  "DEPARTAMENT" 
+   (	"ID_DEPARTAMENT" NUMBER, 
+	"NUME_DEPARTAMENT" VARCHAR2(4000), 
+	 CONSTRAINT "DEPARTAMENT_PK" PRIMARY KEY ("ID_DEPARTAMENT") ENABLE
+   )
+/
+
+CREATE OR REPLACE TRIGGER  "BI_DEPARTAMENT" 
+  before insert on "DEPARTAMENT"               
+  for each row  
+begin   
+    select "DEPARTAMENT_SEQ".nextval into :NEW.ID_DEPARTAMENT from dual; 
+end; 
+
+/
+ALTER TRIGGER  "BI_DEPARTAMENT" ENABLE
+/
+
+/** 
+* Tabelul Salariat
+**/
+
+
+Table
+Data
+Indexes
+Model
+Constraints
+Grants
+Statistics
+UI Defaults
+Triggers
+Dependencies
+SQL
+
+CREATE TABLE  "SALARIAT" 
+   (	"ID_SALARIAT" NUMBER, 
+	"ID_DEPARTAMENT" NUMBER, 
+	"NUME_SALARIAT" VARCHAR2(4000), 
+	"DATA_NASTERE" DATE, 
+	"SALARIU" NUMBER, 
+	 CONSTRAINT "SALARIAT_PK" PRIMARY KEY ("ID_SALARIAT") ENABLE, 
+	 CONSTRAINT "SALARIAT_FK" FOREIGN KEY ("ID_DEPARTAMENT")
+	  REFERENCES  "DEPARTAMENT" ("ID_DEPARTAMENT") ON DELETE CASCADE ENABLE
+   )
+/
+
+CREATE OR REPLACE TRIGGER  "BI_SALARIAT" 
+  before insert on "SALARIAT"               
+  for each row  
+begin   
+    select "SALARIAT_SEQ".nextval into :NEW.ID_SALARIAT from dual; 
+end; 
+
+/
+ALTER TRIGGER  "BI_SALARIAT" ENABLE
+/
+
+
+
+
+/**
+*Diminuarea salariului
+**/
+
+update SALARIAT set salariu=salariu-0.10 * salariu  where id_departament = '1';
+
+/**
+*Salariu maxim pe departamente
+**/
+
+select id_departament, MAX(salariu) from salariat group by id_departament
+
+/**
+* max salary pentru departamentu a carui nume incepe cu T si are peste 30 de angajati 
+**/
+
+select A.nume_departament, max(B.salariu) salMaxim, count(B.salariu) salariat from departament A, salariat B
+where (A.id_departament= B.id_departament) and (nume_departament like 'T%')
+group by A.nume_departament
+having count(B.salariu) > 1;
+
+/**
+*majorare salariu cu 10%
+**/
+
+update salariat 
+set salariu=salariu+0.1*salariu
+where id_departament in (select A.id_departament from departament A, salariat B
+where A.id_departament = B.id_departament group by A.id_departament having count(B.salariu)=1)
